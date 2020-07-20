@@ -245,6 +245,9 @@ func (a Actor) SubmitWindowedPoSt(rt Runtime, params *SubmitWindowedPoStParams) 
 	if rt.CurrEpoch()-params.ChainCommitEpoch > MaxPoStChainCommitAge {
 		rt.Abortf(exitcode.ErrIllegalArgument, "PoSt chain commit too far in the past")
 	}
+	if params.ChainCommitEpoch > rt.CurrEpoch() {
+		rt.Abortf(exitcode.ErrIllegalArgument, "commit epoch cannot be in the future")
+	}
 
 	commRand := rt.GetRandomnessFromBeacon(crypto.DomainSeparationTag_PoStChainCommit, params.ChainCommitEpoch, nil)
 	if !bytes.Equal(commRand, params.ChainCommitRand) {
