@@ -228,9 +228,9 @@ type SubmitWindowedPoStParams struct {
 	// a particular chain.
 	ChainCommitEpoch abi.ChainEpoch
 
-	// ChainCommitSig is a signature from the miner worker over the randomness
-	// at the specified epoch
-	ChainCommitSig crypto.Signature
+	// ChainCommitRand is the randomness on the chain at the ChainCommitEpoch
+	// on the chain this post is committed to
+	ChainCommitRand abi.Randomness
 }
 
 // Invoked by miner's worker address to submit their fallback post
@@ -247,8 +247,8 @@ func (a Actor) SubmitWindowedPoSt(rt Runtime, params *SubmitWindowedPoStParams) 
 	}
 
 	commRand := rt.GetRandomnessFromBeacon(crypto.DomainSeparationTag_PoStChainCommit, params.ChainCommitEpoch, nil)
-	if err := rt.Syscalls().VerifySignature(params.ChainCommitSig, rt.Message().Caller(), commRand); err != nil {
-		rt.Abortf(exitcode.ErrIllegalArgument, "chain commit signature failed to validate: %s", err)
+	if !bytes.Equal(commRand, params.ChainCommitRand) {
+		rt.Abortf(exitcode.ErrIllegalArgument, "post commit randomness mismatched")
 	}
 
 	// Get the total power/reward. We need these to compute penalties.

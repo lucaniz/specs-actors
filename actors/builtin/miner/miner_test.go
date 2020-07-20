@@ -1800,8 +1800,6 @@ func (h *actorHarness) submitWindowPoSt(rt *mock.Runtime, deadline *miner.Deadli
 	commitEpoch := rt.Epoch() - 100
 	rt.ExpectGetRandomnessBeacon(crypto.DomainSeparationTag_PoStChainCommit, commitEpoch, nil, commitRand)
 
-	rt.ExpectVerifySignature(crypto.Signature{}, h.worker, commitRand, nil)
-
 	rt.ExpectValidateCallerAddr(h.worker)
 
 	rt.ExpectSend(builtin.RewardActorAddr, builtin.MethodsReward.ThisEpochReward, nil, big.Zero(), &h.epochReward, exitcode.Ok)
@@ -1898,8 +1896,7 @@ func (h *actorHarness) submitWindowPoSt(rt *mock.Runtime, deadline *miner.Deadli
 		Proofs:           proofs,
 		Skipped:          skipped,
 		ChainCommitEpoch: commitEpoch,
-
-		ChainCommitSig: crypto.Signature{},
+		ChainCommitRand:  commitRand,
 	}
 
 	rt.Call(h.a.SubmitWindowedPoSt, &params)
