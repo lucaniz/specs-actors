@@ -1022,8 +1022,9 @@ func (a Actor) TerminateSectors(rt Runtime, params *TerminateSectorsParams) *Ter
 				err = partitions.Set(decl.Partition, &partition)
 				builtin.RequireNoErr(rt, err, exitcode.ErrIllegalState, "failed to store updated partition", key)
 
-				// Record that partition now has pending early terminations.
+				// Record updates to deadline
 				deadline.EarlyTerminations.Set(decl.Partition)
+				deadline.LiveSectors -= uint64(len(sectors))
 
 				powerDelta = powerDelta.Sub(pwr)
 			}
