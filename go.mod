@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/filecoin-project/go-address v0.0.2-0.20200218010043-eb9bb40ed5be
 	github.com/filecoin-project/go-amt-ipld/v2 v2.0.1-0.20200714161347-fbee6e96f694
-	github.com/filecoin-project/go-bitfield v0.0.3
+	github.com/filecoin-project/go-bitfield v0.0.4-0.20200721204747-0a3651be16c5
 	github.com/gopherjs/gopherjs v0.0.0-20190812055157-5d271430af9f // indirect
 	github.com/ipfs/go-block-format v0.0.2
 	github.com/ipfs/go-cid v0.0.6

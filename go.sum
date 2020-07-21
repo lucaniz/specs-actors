@@ -7,8 +7,8 @@ github.com/filecoin-project/go-address v0.0.2-0.20200218010043-eb9bb40ed5be h1:T
 github.com/filecoin-project/go-address v0.0.2-0.20200218010043-eb9bb40ed5be/go.mod h1:SAOwJoakQ8EPjwNIsiakIQKsoKdkcbx8U3IapgCg9R0=
 github.com/filecoin-project/go-amt-ipld/v2 v2.0.1-0.20200714161347-fbee6e96f694 h1:Hm1/BV2ZGmClQpGzzcCZBkr+DHAtU7+lboqddqhxmAU=
 github.com/filecoin-project/go-amt-ipld/v2 v2.0.1-0.20200714161347-fbee6e96f694/go.mod h1:eQdFTYVHyv7Wm+0rwAcJCSKbqGyDYn4f4Ev3fW3qbWU=
-github.com/filecoin-project/go-bitfield v0.0.3 h1:W04NDq2HBJ+qSoAJZbfChvpKHSI61rUWKaDMtClKCkI=
-github.com/filecoin-project/go-bitfield v0.0.3/go.mod h1:Ry9/iUlWSyjPUzlAvdnfy4Gtvrq4kWmWDztCU1yEgJY=
+github.com/filecoin-project/go-bitfield v0.0.4-0.20200721204747-0a3651be16c5 h1:p+gtgwZy5xFpGDOLYbFYRbChToy9pGIb5y3XtIes+Hw=
+github.com/filecoin-project/go-bitfield v0.0.4-0.20200721204747-0a3651be16c5/go.mod h1:CNl9WG8hgR5mttCnUErjcQjGvuiZjRqK9rHVBsQF4oM=
 github.com/filecoin-project/go-crypto v0.0.0-20191218222705-effae4ea9f03 h1:2pMXdBnCiXjfCYx/hLqFxccPoqsSveQFxVLvNxy9bus=
 github.com/filecoin-project/go-crypto v0.0.0-20191218222705-effae4ea9f03/go.mod h1:+viYnvGtUTgJRdy6oaeF4MTFKAfatX071MPDPBL11EQ=
 github.com/gogo/protobuf v1.3.1 h1:DqDEcV5aeaTmdFBePNpYsp3FlcVH/2ISVVM9Qf8PSls=
