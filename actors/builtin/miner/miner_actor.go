@@ -1352,6 +1352,9 @@ func (a Actor) CompactPartitions(rt Runtime, params *CompactPartitionsParams) *a
 		rt.Abortf(exitcode.ErrIllegalArgument, "invalid deadline %v", params.Deadline)
 	}
 
+	partitionCount, err := params.Partitions.Count()
+	builtin.RequireNoErr(rt, err, exitcode.ErrIllegalArgument, "failed to parse partitions bitfield")
+
 	store := adt.AsStore(rt)
 	var st State
 	rt.State().Transaction(&st, func() interface{} {
@@ -1367,9 +1370,6 @@ func (a Actor) CompactPartitions(rt Runtime, params *CompactPartitionsParams) *a
 			rt.Abortf(exitcode.ErrForbidden,
 				"cannot compact deadline %d during its challenge window or the prior challenge window", params.Deadline)
 		}
-
-		partitionCount, err := params.Partitions.Count()
-		builtin.RequireNoErr(rt, err, exitcode.ErrIllegalArgument, "failed to parse partitions bitfield")
 
 		submissionPartitionLimit := loadPartitionsSectorsMax(info.WindowPoStPartitionSectors)
 		if partitionCount > submissionPartitionLimit {

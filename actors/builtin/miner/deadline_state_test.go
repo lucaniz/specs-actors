@@ -164,10 +164,10 @@ func TestDeadlines(t *testing.T) {
 			)
 		}
 
-		// Try to compact a partition with early terminations.
+		// Try to remove a partition with early terminations.
 		{
 			_, _, _, err := dl.RemovePartitions(store, bf(0), quantSpec)
-			require.Error(t, err, "should have failed to compact a partition with early terminations")
+			require.Error(t, err, "should have failed to remove a partition with early terminations")
 		}
 
 		// Pop early terminations
@@ -197,10 +197,10 @@ func TestDeadlines(t *testing.T) {
 			)
 		}
 
-		// Try to compact no partitions
+		// Try to remove no partitions
 		{
 			live, dead, removedPower, err := dl.RemovePartitions(store, bf(), quantSpec)
-			require.NoError(t, err, "should not have failed to compact no partitions")
+			require.NoError(t, err, "should not have failed to remove no partitions")
 			require.True(t, removedPower.IsZero())
 			assertBitfieldEquals(t, live)
 			assertBitfieldEquals(t, dead)
@@ -246,16 +246,16 @@ func TestDeadlines(t *testing.T) {
 			)
 		}
 
-		// Try to compact a partition with faulty sectors.
+		// Try to remove a partition with faulty sectors.
 		{
 			_, _, _, err := dl.RemovePartitions(store, bf(1), quantSpec)
-			require.Error(t, err, "should have failed to compact a partition with faults")
+			require.Error(t, err, "should have failed to remove a partition with faults")
 		}
 
-		// Try to compact a missing partition.
+		// Try to remove a missing partition.
 		{
 			_, _, _, err := dl.RemovePartitions(store, bf(2), quantSpec)
-			require.Error(t, err, "should have failed to compact missing partition")
+			require.Error(t, err, "should have failed to remove missing partition")
 		}
 	})
 }

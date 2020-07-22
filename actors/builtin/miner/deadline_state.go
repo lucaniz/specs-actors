@@ -452,7 +452,7 @@ func (dl *Deadline) popExpiredPartitions(store adt.Store, until abi.ChainEpoch, 
 //
 // Returns an error if any of the partitions contained faulty sectors or early
 // terminations.
-func (dl *Deadline) RemovePartitions(store adt.Store, partitions *bitfield.BitField, quant QuantSpec) (
+func (dl *Deadline) RemovePartitions(store adt.Store, toRemove *bitfield.BitField, quant QuantSpec) (
 	live, dead *abi.BitField, removedPower PowerPair, err error,
 ) {
 	oldPartitions, err := dl.PartitionsArray(store)
@@ -461,7 +461,7 @@ func (dl *Deadline) RemovePartitions(store adt.Store, partitions *bitfield.BitFi
 	}
 
 	partitionCount := oldPartitions.Length()
-	toCompact, err := partitions.AllMap(partitionCount)
+	toRemoveSet, err := toRemove.AllMap(partitionCount)
 	if err != nil {
 		// TODO: This may be an illegal argument error if we have too many partitions.
 		// https://github.com/filecoin-project/specs-actors/issues/597
@@ -469,11 +469,11 @@ func (dl *Deadline) RemovePartitions(store adt.Store, partitions *bitfield.BitFi
 	}
 
 	// Nothing to do.
-	if len(toCompact) == 0 {
+	if len(toRemoveSet) == 0 {
 		return bitfield.NewFromSet(nil), bitfield.NewFromSet(nil), NewPowerPairZero(), nil
 	}
 
-	for partIdx := range toCompact { //nolint:nomaprange
+	for partIdx := range toRemoveSet { //nolint:nomaprange
 		if partIdx >= partitionCount {
 			// TODO: This is an illegal argument error
 			// https://github.com/filecoin-project/specs-actors/issues/597
@@ -487,12 +487,12 @@ func (dl *Deadline) RemovePartitions(store adt.Store, partitions *bitfield.BitFi
 		return nil, nil, NewPowerPairZero(), xerrors.Errorf("failed to check for early terminations: %w", err)
 	}
 	if !noEarlyTerminations {
-		return nil, nil, NewPowerPairZero(), xerrors.Errorf("cannot compact deadline with early terminations: %w", err)
+		return nil, nil, NewPowerPairZero(), xerrors.Errorf("cannot remove partitions from deadline with early terminations: %w", err)
 	}
 
 	newPartitions := adt.MakeEmptyArray(store)
-	allDeadSectors := make([]*bitfield.BitField, 0, len(toCompact))
-	allLiveSectors := make([]*bitfield.BitField, 0, len(toCompact))
+	allDeadSectors := make([]*bitfield.BitField, 0, len(toRemoveSet))
+	allLiveSectors := make([]*bitfield.BitField, 0, len(toRemoveSet))
 	removedPower = NewPowerPairZero()
 
 	// Define all of these out here to save allocations.
@@ -503,7 +503,7 @@ func (dl *Deadline) RemovePartitions(store adt.Store, partitions *bitfield.BitFi
 	)
 	if err = oldPartitions.ForEach(&lazyPartition, func(partIdx int64) error {
 		// If we're keeping the partition as-is, append it to the new partitions array.
-		if _, ok := toCompact[uint64(partIdx)]; !ok {
+		if _, ok := toRemoveSet[uint64(partIdx)]; !ok {
 			return newPartitions.AppendContinuous(&lazyPartition)
 		}
 
@@ -515,7 +515,7 @@ func (dl *Deadline) RemovePartitions(store adt.Store, partitions *bitfield.BitFi
 			return xerrors.Errorf("failed to decode partition %d: %w", partIdx, err)
 		}
 
-		// Don't allow compacting partitions with faulty sectors.
+		// Don't allow removing partitions with faulty sectors.
 		hasNoFaults, err := partition.Faults.IsEmpty()
 		if err != nil {
 			return xerrors.Errorf("failed to decode faults for partition %d: %w", partIdx, err)
@@ -523,7 +523,7 @@ func (dl *Deadline) RemovePartitions(store adt.Store, partitions *bitfield.BitFi
 		if !hasNoFaults {
 			// TODO: this is an invalid argument error.
 			// https://github.com/filecoin-project/specs-actors/issues/597
-			return xerrors.Errorf("cannot compact partition %d: has faults", partIdx)
+			return xerrors.Errorf("cannot remove partition %d: has faults", partIdx)
 		}
 
 		// Get the live sectors.
@@ -577,7 +577,7 @@ func (dl *Deadline) RemovePartitions(store adt.Store, partitions *bitfield.BitFi
 
 		var epochsToRemove []uint64
 		err = expirationEpochs.ForEach(func(epoch abi.ChainEpoch, bf *bitfield.BitField) error {
-			bf, err := bitfield.CutBitField(bf, partitions)
+			bf, err := bitfield.CutBitField(bf, toRemove)
 			if err != nil {
 				return err
 			}
