@@ -13,7 +13,7 @@ require (
 	github.com/ipfs/go-ipld-cbor v0.0.4
 	github.com/ipfs/go-ipld-format v0.0.2 // indirect
 	github.com/minio/blake2b-simd v0.0.0-20160723061019-3f5f724cb5b1
-	github.com/minio/sha256-simd v0.1.1 // indirect
+	github.com/minio/sha256-simd v0.1.1
 	github.com/multiformats/go-multihash v0.0.14
 	github.com/pkg/errors v0.9.1
 	github.com/polydawn/refmt v0.0.0-20190809202753-05966cbd336a // indirect
