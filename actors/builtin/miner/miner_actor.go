@@ -1005,7 +1005,7 @@ func (a Actor) TerminateSectors(rt Runtime, params *TerminateSectorsParams) *Ter
 
 			byPartition := make(map[uint64][]*SectorOnChainInfo, len(decls))
 			for _, decl := range decls {
-				sectors, err := sectors.LoadSectorInfos(decl.Sectors)
+				sectors, err := sectors.Load(decl.Sectors)
 				builtin.RequireNoErr(rt, err, exitcode.ErrIllegalState, "failed to load deadline %d", dlIdx)
 				byPartition[decl.Partition] = append(byPartition[decl.Partition], sectors...)
 			}

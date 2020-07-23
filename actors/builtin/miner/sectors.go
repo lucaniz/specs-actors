@@ -5,6 +5,7 @@ import (
 
 	"github.com/filecoin-project/specs-actors/actors/abi"
 	"github.com/filecoin-project/specs-actors/actors/util/adt"
+	"golang.org/x/xerrors"
 
 	"github.com/ipfs/go-cid"
 )
@@ -21,15 +22,11 @@ func LoadSectors(store adt.Store, root cid.Cid) (*Sectors, error) {
 // to pass this object around as needed.
 type Sectors adt.Array
 
-func (sa *Sectors) array() *adt.Array {
-	return (*adt.Array)(sa)
-}
-
 func (sa *Sectors) Root() (cid.Cid, error) {
 	return sa.array().Root()
 }
 
-func (sa *Sectors) LoadSectorInfos(sectorNos *abi.BitField) ([]*SectorOnChainInfo, error) {
+func (sa *Sectors) Load(sectorNos *abi.BitField) ([]*SectorOnChainInfo, error) {
 	arr := sa.array()
 
 	var sectorInfos []*SectorOnChainInfo
@@ -37,9 +34,9 @@ func (sa *Sectors) LoadSectorInfos(sectorNos *abi.BitField) ([]*SectorOnChainInf
 		var sectorOnChain SectorOnChainInfo
 		found, err := arr.Get(i, &sectorOnChain)
 		if err != nil {
-			return fmt.Errorf("failed to load sector %v: %w", abi.SectorNumber(i), err)
+			return xerrors.Errorf("failed to load sector %v: %w", abi.SectorNumber(i), err)
 		} else if !found {
-			return fmt.Errorf("can't find sector %d", i)
+			return xerrors.Errorf("can't find sector %d", i)
 		}
 		sectorInfos = append(sectorInfos, &sectorOnChain)
 		return nil
@@ -54,7 +51,7 @@ func (sa *Sectors) Get(sectorNumber abi.SectorNumber) (info *SectorOnChainInfo, 
 
 	var res SectorOnChainInfo
 	if found, err := arr.Get(uint64(sectorNumber), &res); err != nil {
-		return nil, false, fmt.Errorf("failed to get sector %d: %w", sectorNumber, err)
+		return nil, false, xerrors.Errorf("failed to get sector %d: %w", sectorNumber, err)
 	} else if !found {
 		return nil, false, nil
 	}
@@ -66,7 +63,7 @@ func (sa *Sectors) Store(infos ...*SectorOnChainInfo) error {
 
 	for _, info := range infos {
 		if info == nil {
-			return fmt.Errorf("nil sector info")
+			return xerrors.Errorf("nil sector info")
 		}
 		if info.SectorNumber > abi.MaxSectorNumber {
 			return fmt.Errorf("sector number %d out of range", info.SectorNumber)
@@ -86,4 +83,8 @@ func (sa *Sectors) MustGet(sectorNumber abi.SectorNumber) (info *SectorOnChainIn
 	} else {
 		return info, nil
 	}
+}
+
+func (sa *Sectors) array() *adt.Array {
+	return (*adt.Array)(sa)
 }

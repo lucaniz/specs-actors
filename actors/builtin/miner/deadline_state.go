@@ -446,14 +446,21 @@ func (dl *Deadline) popExpiredPartitions(store adt.Store, until abi.ChainEpoch, 
 	return popped, modified, nil
 }
 
-func (dl *Deadline) TerminateSectors(store adt.Store, epoch abi.ChainEpoch, sectors map[uint64][]*SectorOnChainInfo, ssize abi.SectorSize, quant QuantSpec) (removedPower PowerPair, err error) {
+func (dl *Deadline) TerminateSectors(
+	store adt.Store,
+	epoch abi.ChainEpoch,
+	partitionSectors map[uint64][]*SectorOnChainInfo,
+	ssize abi.SectorSize,
+	quant QuantSpec,
+) (removedPower PowerPair, err error) {
+
 	partitions, err := dl.PartitionsArray(store)
 	if err != nil {
 		return NewPowerPairZero(), xerrors.Errorf("failed to load partitions: %w", err)
 	}
 
-	partitionIdxs := make([]uint64, 0, len(sectors))
-	for partIdx := range sectors { //nolint:nomaprange
+	partitionIdxs := make([]uint64, 0, len(partitionSectors))
+	for partIdx := range partitionSectors { //nolint:nomaprange
 		partitionIdxs = append(partitionIdxs, partIdx)
 	}
 	sort.Slice(partitionIdxs, func(i, j int) bool { return i < j })
@@ -461,7 +468,8 @@ func (dl *Deadline) TerminateSectors(store adt.Store, epoch abi.ChainEpoch, sect
 	removedPower = NewPowerPairZero()
 
 	var partition Partition
-	for partIdx, partSectors := range sectors {
+	for _, partIdx := range partitionIdxs {
+		partSectors := partitionSectors[partIdx]
 		if found, err := partitions.Get(partIdx, &partition); err != nil {
 			return NewPowerPairZero(), xerrors.Errorf("failed to load partition %d: %w", partIdx, err)
 		} else if !found {
