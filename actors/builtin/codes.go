@@ -21,27 +21,32 @@ var (
 	CallerTypesSignable         []cid.Cid
 )
 
+var builtinActors map[cid.Cid]string
+
 func init() {
 	builder := cid.V1Builder{Codec: cid.Raw, MhType: mh.IDENTITY}
-	makeBuiltin := func(s string) cid.Cid {
-		c, err := builder.Sum([]byte(s))
+	builtinActors = make(map[cid.Cid]string)
+
+	for id, name := range map[*cid.Cid]string{
+		&SystemActorCodeID:           "fil/1/system",
+		&InitActorCodeID:             "fil/1/init",
+		&CronActorCodeID:             "fil/1/cron",
+		&AccountActorCodeID:          "fil/1/account",
+		&StoragePowerActorCodeID:     "fil/1/storagepower",
+		&StorageMinerActorCodeID:     "fil/1/storageminer",
+		&StorageMarketActorCodeID:    "fil/1/storagemarket",
+		&PaymentChannelActorCodeID:   "fil/1/paymentchannel",
+		&MultisigActorCodeID:         "fil/1/multisig",
+		&RewardActorCodeID:           "fil/1/reward",
+		&VerifiedRegistryActorCodeID: "fil/1/verifiedregistry",
+	} {
+		c, err := builder.Sum([]byte(name))
 		if err != nil {
 			panic(err)
 		}
-		return c
+		*id = c
+		builtinActors[c] = name
 	}
-
-	SystemActorCodeID = makeBuiltin("fil/1/system")
-	InitActorCodeID = makeBuiltin("fil/1/init")
-	CronActorCodeID = makeBuiltin("fil/1/cron")
-	AccountActorCodeID = makeBuiltin("fil/1/account")
-	StoragePowerActorCodeID = makeBuiltin("fil/1/storagepower")
-	StorageMinerActorCodeID = makeBuiltin("fil/1/storageminer")
-	StorageMarketActorCodeID = makeBuiltin("fil/1/storagemarket")
-	PaymentChannelActorCodeID = makeBuiltin("fil/1/paymentchannel")
-	MultisigActorCodeID = makeBuiltin("fil/1/multisig")
-	RewardActorCodeID = makeBuiltin("fil/1/reward")
-	VerifiedRegistryActorCodeID = makeBuiltin("fil/1/verifiedregistry")
 
 	// Set of actor code types that can represent external signing parties.
 	CallerTypesSignable = []cid.Cid{AccountActorCodeID, MultisigActorCodeID}
@@ -49,17 +54,8 @@ func init() {
 
 // IsBuiltinActor returns true if the code belongs to an actor defined in this repo.
 func IsBuiltinActor(code cid.Cid) bool {
-	return code.Equals(SystemActorCodeID) ||
-		code.Equals(InitActorCodeID) ||
-		code.Equals(CronActorCodeID) ||
-		code.Equals(AccountActorCodeID) ||
-		code.Equals(StoragePowerActorCodeID) ||
-		code.Equals(StorageMinerActorCodeID) ||
-		code.Equals(StorageMarketActorCodeID) ||
-		code.Equals(PaymentChannelActorCodeID) ||
-		code.Equals(MultisigActorCodeID) ||
-		code.Equals(RewardActorCodeID) ||
-		code.Equals(VerifiedRegistryActorCodeID)
+	_, isBuiltin := builtinActors[code]
+	return isBuiltin
 }
 
 // ActorNameByCode returns the (string) name of the actor given a cid code.
@@ -68,20 +64,7 @@ func ActorNameByCode(code cid.Cid) string {
 		return "<undefined>"
 	}
 
-	names := map[cid.Cid]string{
-		SystemActorCodeID:           "fil/1/system",
-		InitActorCodeID:             "fil/1/init",
-		CronActorCodeID:             "fil/1/cron",
-		AccountActorCodeID:          "fil/1/account",
-		StoragePowerActorCodeID:     "fil/1/storagepower",
-		StorageMinerActorCodeID:     "fil/1/storageminer",
-		StorageMarketActorCodeID:    "fil/1/storagemarket",
-		PaymentChannelActorCodeID:   "fil/1/paymentchannel",
-		MultisigActorCodeID:         "fil/1/multisig",
-		RewardActorCodeID:           "fil/1/reward",
-		VerifiedRegistryActorCodeID: "fil/1/verifiedregistry",
-	}
-	name, ok := names[code]
+	name, ok := builtinActors[code]
 	if !ok {
 		return "<unknown>"
 	}
