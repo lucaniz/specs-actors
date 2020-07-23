@@ -47,6 +47,7 @@ func TestDeadlines(t *testing.T) {
 		assert.True(t, expectedPower.Equals(power))
 		assertDeadlineState(t, rt,
 			dl,
+			quantSpec,
 			sectors,
 			sectorSize,
 			partitionSize,
@@ -74,6 +75,7 @@ func TestDeadlines(t *testing.T) {
 
 			assertDeadlineState(t, rt,
 				dl,
+				quantSpec,
 				sectors,
 				sectorSize,
 				partitionSize,
@@ -150,6 +152,7 @@ func TestDeadlines(t *testing.T) {
 
 			assertDeadlineState(t, rt,
 				dl,
+				quantSpec,
 				sectors,
 				sectorSize,
 				partitionSize,
@@ -183,6 +186,7 @@ func TestDeadlines(t *testing.T) {
 			// Popping early terminations doesn't affect the terminations bitfield.
 			assertDeadlineState(t, rt,
 				dl,
+				quantSpec,
 				sectors,
 				sectorSize,
 				partitionSize,
@@ -208,6 +212,7 @@ func TestDeadlines(t *testing.T) {
 			// Popping early terminations doesn't affect the terminations bitfield.
 			assertDeadlineState(t, rt,
 				dl,
+				quantSpec,
 				sectors,
 				sectorSize,
 				partitionSize,
@@ -233,6 +238,7 @@ func TestDeadlines(t *testing.T) {
 
 			assertDeadlineState(t, rt,
 				dl,
+				quantSpec,
 				sectors,
 				sectorSize,
 				partitionSize,
@@ -272,6 +278,7 @@ func assertDeadlineState(
 	t *testing.T,
 	rt *mock.Runtime,
 	dl *miner.Deadline,
+	quant miner.QuantSpec,
 	sectors []*miner.SectorOnChainInfo,
 	sectorSize abi.SectorSize,
 	partitionSize uint64,
@@ -309,12 +316,9 @@ func assertDeadlineState(
 		partTerminations, err := bitfield.IntersectBitField(terminations, partSectorNos)
 		require.NoError(t, err)
 
-		unterminatedSectors, err := bitfield.SubtractBitField(partSectorNos, partTerminations)
-		require.NoError(t, err)
-		partSectors := selectSectors(t, sectors, unterminatedSectors)
-
 		assertPartitionState(t,
-			&partition, partSectors, sectorSize, partSectorNos, partFaults, partRecovering, partTerminations)
+			store,
+			&partition, quant, sectorSize, sectors, partSectorNos, partFaults, partRecovering, partTerminations)
 
 		earlyTerminated, err := adt.AsArray(store, partition.EarlyTerminated)
 		require.NoError(t, err)
